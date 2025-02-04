@@ -11,11 +11,14 @@ if (!window.DataStore.has("fake-rune-pages")) {
 let isSaving = false
 
 window.addEventListener("load", () => {
-    // Add button to runes setup page
+    // Add button to runes setup
     upl.observer.subscribeToElementCreation(".perks-body-header", (element: any) => {
+        if (!element) return
+
         try {
             document.querySelector(".save-fake-rune-pages-button")?.remove()
         } catch {}
+
         if (!document.querySelector(".save-fake-rune-pages-button")) {
             let button = document.createElement("lol-uikit-flat-button")
             button.setAttribute("class", "save-fake-rune-pages-button")
@@ -52,19 +55,20 @@ window.addEventListener("load", () => {
 
     // Add dropdown to champs select
     upl.observer.subscribeToElementCreation(".loadout-edit-controls", (element: any) => {
+        if (!element) return
+
         try {
             document.querySelector("#fake-rune-page-dropdown")?.remove()
         } catch {} 
         
         if (!document.querySelector("#fake-rune-page-dropdown")) {
-            let dropdown = document.createElement("lol-uikit-framed-dropdown")
+            const dropdown = document.createElement("lol-uikit-framed-dropdown")
             dropdown.classList.add("lol-settings-general-dropdown")
             dropdown.id = "fake-rune-page-dropdown"
-            dropdown.style.cssText = `
-                width: 200px;
-            `
+            dropdown.style.cssText = `width: 200px;`
 
-            let fakePageList = window.DataStore.get("fake-rune-pages")
+            const fakePageList = window.DataStore.get("fake-rune-pages")
+
             for (let i = 0; i < fakePageList.length; i++) {
                 let el = document.createElement("lol-uikit-dropdown-option")
 
@@ -80,9 +84,10 @@ window.addEventListener("load", () => {
         }
     })
 
+    // Inject settings ui
     settings.injectSettingsUI()
 })
 
-export function init(context) {
+export function init(context: any) {
     settingsUtils(context, settings.data)
 }

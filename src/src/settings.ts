@@ -57,7 +57,7 @@ class Settings {
         ]
     }
 
-    settingsUI = (panel: any) => {
+    settingsUI = (panel: Element) => {
         panel.prepend(
             UI.Row("",[
                 UI.Row("Info",[
@@ -74,7 +74,7 @@ class Settings {
         )
     }
 
-    backupRestoreUI = (panel: any) => {
+    backupRestoreUI = (panel: Element) => {
         panel.prepend(
             UI.Row("",[
                 UI.Row("Info",[

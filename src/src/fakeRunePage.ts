@@ -17,7 +17,7 @@ class FetchData {
 }
 
 class FakeRunePages extends FetchData {
-    async getPageInfo() {
+    async getPageInfo(): Promise<{name: string, selectedRunes: number[], primaryStyle: number, subStyle: number}> {
         let pageInfo = await this.get("/lol-perks/v1/currentpage")
         let fakePageInfo = {
             "name": pageInfo.name,
@@ -42,7 +42,7 @@ class FakeRunePages extends FetchData {
 
     async saveFakePageInfo() {
         let currentPage = await this.getPageInfo()
-        let fakeRuneList = window.DataStore.get("fake-rune-pages")
+        let fakeRuneList: Array<{name: string, selectedRunes: number[], primaryStyle: number, subStyle: number}> = window.DataStore.get("fake-rune-pages")
         let isDuplicated = false
         let duplicatIndex = 0
 
@@ -57,10 +57,9 @@ class FakeRunePages extends FetchData {
         if (!isDuplicated) {
             fakeRuneList.push(currentPage)
             window.DataStore.set("fake-rune-pages", fakeRuneList)
-
         }
         else {
-            fakeRuneList = fakeRuneList.filter(page => page["name"] != fakeRuneList[duplicatIndex]["name"])
+            fakeRuneList = fakeRuneList.filter((page: { [x: string]: any }) => page["name"] != fakeRuneList[duplicatIndex]["name"])
             fakeRuneList.push(currentPage)
             window.DataStore.set("fake-rune-pages", fakeRuneList)
         }
@@ -68,7 +67,7 @@ class FakeRunePages extends FetchData {
         log("Saved")
     }
 
-    async setRunePageToCurrentChamp(page: Object) {
+    async setRunePageToCurrentChamp(page: {name: string, selectedRunes: number[], primaryStyle: number, subStyle: number}) {
         await this.post("/lol-perks/v1/pages", {
             "name": page["name"],
             "selectedPerkIds": page["selectedRunes"],

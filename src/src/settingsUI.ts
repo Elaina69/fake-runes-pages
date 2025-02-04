@@ -1,4 +1,3 @@
-import { log } from "./log.ts"
 const UI = {
     Row: (id, childs) => {
         const row = document.createElement('div')

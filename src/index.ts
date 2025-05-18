@@ -1,4 +1,4 @@
-import * as upl from "pengu-upl"
+import * as upl from "./src/index.js"
 import { log } from "./src/log.ts"
 import { fakeRunePages } from "./src/fakeRunePage.ts"
 import { settings } from "./src/settings.ts"

@@ -9,6 +9,7 @@ if (!window.DataStore.has("fake-rune-pages")) {
 }
 
 let isSaving = false
+let selectedPageIndex: number | null = null
 
 window.addEventListener("load", () => {
     // Add button to runes setup
@@ -67,7 +68,7 @@ window.addEventListener("load", () => {
             dropdown.id = "fake-rune-page-dropdown"
             dropdown.style.cssText = `width: 200px;`
 
-            const fakePageList = window.DataStore.get("fake-rune-pages")
+            let fakePageList = window.DataStore.get("fake-rune-pages")
 
             for (let i = 0; i < fakePageList.length; i++) {
                 let el = document.createElement("lol-uikit-dropdown-option")
@@ -76,6 +77,7 @@ window.addEventListener("load", () => {
                 el.innerText = fakePageList[i]["name"]
                 el.onclick = async () => {
                     await fakeRunePages.setRunePageToCurrentChamp(fakePageList[i])
+                    selectedPageIndex = i
                 }
                 dropdown.appendChild(el)
             }
@@ -83,6 +85,19 @@ window.addEventListener("load", () => {
             element.prepend(dropdown)
         }
     })
+
+    upl.observer.subscribeToElementDeletion(".loadout-edit-controls", (element: any) => {
+        selectedPageIndex = null
+    })
+
+    // Global interval to check for changes in the selected rune page
+    window.setInterval(async () => {
+        if (selectedPageIndex === null) return
+        else {
+            let fakePageList = window.DataStore.get("fake-rune-pages")
+            await fakeRunePages.setRunePageToCurrentChamp(fakePageList[selectedPageIndex])
+        }
+    }, 1000)
 
     // Inject settings ui
     settings.injectSettingsUI()

@@ -17,6 +17,13 @@ class FetchData {
 }
 
 class FakeRunePages extends FetchData {
+    checkTime(): number {
+        let text = document.querySelector(".timer-container > .timer")?.innerHTML as string
+        let number = parseInt(text?.trim());
+        
+        return number;  
+    }
+
     async getPageInfo(): Promise<{name: string, selectedRunes: number[], primaryStyle: number, subStyle: number}> {
         let pageInfo = await this.get("/lol-perks/v1/currentpage")
         let fakePageInfo = {
@@ -28,16 +35,6 @@ class FakeRunePages extends FetchData {
         }
         
         return fakePageInfo
-    }
-
-    async savePageInfo() {
-        let defaultSavePageButton = document.querySelector(".save-page.ember-view");
-        if (defaultSavePageButton && defaultSavePageButton.shadowRoot) {
-            let divElement = defaultSavePageButton.shadowRoot.querySelector("div");
-            if (divElement) {
-                divElement.click();
-            }
-        }
     }
 
     async saveFakePageInfo() {
@@ -74,10 +71,10 @@ class FakeRunePages extends FetchData {
             "order":1,
             "primaryStyleId": page["primaryStyle"],
             "subStyleId": page["subStyle"],
-            "isTemporary":true,
-            "runeRecommendationId":"ElainaDaCatto",
-            "isRecommendationOverride":false,
-            "recommendationIndex":0
+            "isTemporary": true,
+            "runeRecommendationId": "ElainaDaCatto",
+            "isRecommendationOverride": false,
+            "recommendationIndex": 0
         })
     }
 }

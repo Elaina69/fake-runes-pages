@@ -84,4 +84,6 @@ declare interface Window {
     };
     storeObserver               : any;
     __llver                     : string;
+
+    saveFakeRuneAfterEdit       : () => Promise<void>;
 };

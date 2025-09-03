@@ -9,42 +9,49 @@ if (!window.DataStore.has("fake-rune-pages")) {
 }
 
 let isSaving = false
-let selectedPageIndex: number = -1
-let rewriteRitoAutoRune: boolean = false;
-
-let saveFakeRuneAfterEdit = async () => {
-    if (!isSaving) {
-        isSaving = true
-        log("Saving rune page...")
-
-        let saveFakeRunesPages = new Promise<void>((resolve, reject) => {
-            setTimeout(async () => {
-                try { 
-                    await fakeRunePages.saveFakePageInfo()
-                    isSaving = false
-                    resolve()
-                } 
-                catch {
-                    reject()
-                }
-            },3000)
-        })
-                    
-        window.Toast.promise(saveFakeRunesPages, {
-            loading: 'Saving rune page...',
-            success: 'Saved!',
-            error: 'Error while saving runes pages, check console for more info!'
-        })
-    }
-}
-
-window.saveFakeRuneAfterEdit = saveFakeRuneAfterEdit
+let selectedPageIndex: number | null = null
 
 window.addEventListener("load", () => {
-    // Add onClick attribute to save button
-    upl.observer.subscribeToElementCreation(".perks-header-content-group > .save-page", (element: any) => {
-        log("Editing runes page")
-        element.setAttribute("onClick", "window.saveFakeRuneAfterEdit()")  
+    // Add button to runes setup
+    upl.observer.subscribeToElementCreation(".perks-body-header", (element: any) => {
+        if (!element) return
+
+        try {
+            document.querySelector(".save-fake-rune-pages-button")?.remove()
+        } catch {}
+
+        if (!document.querySelector(".save-fake-rune-pages-button")) {
+            let button = document.createElement("lol-uikit-flat-button")
+            button.setAttribute("class", "save-fake-rune-pages-button")
+            button.style.marginLeft = "10px"
+            button.textContent = "Save runes to DataStore"
+            button.onclick = async () => { 
+                if (!isSaving) {
+                    isSaving = true
+                    log("Saving rune page...")
+                    await fakeRunePages.savePageInfo()
+                    let saveFakeRunesPages = new Promise<void>((resolve, reject) => {
+                        setTimeout(async () => {
+                            try { 
+                                await fakeRunePages.saveFakePageInfo()
+                                isSaving = false
+                                resolve()
+                            }
+                            catch {
+                                reject()
+                            }
+                        },3000)
+                    })
+                    
+                    window.Toast.promise(saveFakeRunesPages, {
+                        loading: 'Saving rune page...',
+                        success: 'Saved!',
+                        error: 'Error while saving runes pages, check console for more info!'
+                    })
+                }
+            }
+            element.append(button)
+        }
     })
 
     // Add dropdown to champs select
@@ -69,8 +76,8 @@ window.addEventListener("load", () => {
                 el.setAttribute("slot", "lol-uikit-dropdown-option")
                 el.innerText = fakePageList[i]["name"]
                 el.onclick = async () => {
-                    selectedPageIndex = i
                     await fakeRunePages.setRunePageToCurrentChamp(fakePageList[i])
+                    selectedPageIndex = i
                 }
                 dropdown.appendChild(el)
             }
@@ -80,39 +87,17 @@ window.addEventListener("load", () => {
     })
 
     upl.observer.subscribeToElementDeletion(".loadout-edit-controls", (element: any) => {
-        selectedPageIndex = -1
-        rewriteRitoAutoRune = false
+        selectedPageIndex = null
     })
 
     // Global interval to check for changes in the selected rune page
     window.setInterval(async () => {
-        let currentChampselectTime = fakeRunePages.checkTime()
-        let fakePageList = window.DataStore.get("fake-rune-pages")
-
-        if (3 <= currentChampselectTime && currentChampselectTime <= 6) {
-            // log("test 2")
-
-            if (!rewriteRitoAutoRune) return
-            if (selectedPageIndex == -1) return
-
+        if (selectedPageIndex === null) return
+        else {
+            let fakePageList = window.DataStore.get("fake-rune-pages")
             await fakeRunePages.setRunePageToCurrentChamp(fakePageList[selectedPageIndex])
         }
-        else {
-            let currentPage = (await (await fetch("/lol-perks/v1/pages")).json())[0]
-            if (currentPage.runeRecommendationId != "ElainaDaCatto") {
-                selectedPageIndex = -1
-                rewriteRitoAutoRune = false
-                // log("test 3")
-            }
-            else {
-                selectedPageIndex = fakePageList.findIndex(page => page.name == currentPage.name)
-                rewriteRitoAutoRune = true
-                // log("test 4")
-            }
-        }
-
-        // log("index:", selectedPageIndex, ", rewriteRitoAutoRune:", rewriteRitoAutoRune)
-    }, 300)
+    }, 1000)
 
     // Inject settings ui
     settings.injectSettingsUI()
